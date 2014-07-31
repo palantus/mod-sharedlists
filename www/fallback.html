@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+	<title>Shared Lists - fallback</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=10,IE=9,IE=8,IE=edge" />
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="shortcut icon" sizes="1024x1024" href="/img/checklist.png">
+	
+	<link rel="stylesheet" type="text/css" href="/sharedlists/css/sharedlists.css" />
+	<link rel="stylesheet" type="text/css" href="/css/popupcreator.css" />
+	
+	<script src="/js/jquery.min.js"></script>
+	<script src="/js/jquery.cookie.js"></script>
+	<script src="/js/all.js"></script>
+	<script src="/sharedlists/js/sharedlists.js"></script>
+	<!--<script src="/js/framework.js"></script>-->
+	
+	<script>
+	$(function() {
+		init();
+	});
+
+	</script>
+</head>
+<body>
+	<div id="topbar">
+		<div id="topleft">
+			<button id="openbucket">Open bucket</button>
+			<button id="back" style="display:none">Back</button>
+		</div>
+		<span id="offline">Offline</span>
+		<div id="topright">
+			<button id="addlist">Add list</button>
+			<button id="removelist" style="display:none">Remove list</button>
+		</div>
+	</div>
+	
+	<div id="content">
+		<table id="maintable">
+			<thead><tr><th id='title' colspan="2"></th></tr></thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	
+	<div id="bottombar" style="display:none">
+		<div id="bottomleft">
+			<button id="additem">Add</button>
+			<button id="clearcompleted">Clear Completed</button>
+			<button id="refresh">Refresh</button>
+		</div>
+	</div>
+</body>
+</html>

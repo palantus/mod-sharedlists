@@ -1,0 +1,4 @@
+{
+	"main" : "SharedListsModule.js",
+	"deps": ["database", "user"]
+}
