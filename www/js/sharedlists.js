@@ -122,13 +122,13 @@ function initFunctionality(){
 	});
 
 	$("#openbucket").click(function(){
-		var bid = prompt("Enter a bucket ID:");
-		if(bid){
+		var bid = prompt("Enter a bucket ID or leave empty to generate a new random ID:");
+		if (bid !== null && bid !== false) { // Canceled
+
+			if(!bid)
+				bid = guid();
+
 			window.location = "?b=" + bid;
-			/*
-			curBucket = bid;
-			refreshBucket();
-			*/
 		}
 	});
 
@@ -218,10 +218,12 @@ function initFunctionality(){
 	
 	$("#addlist").click(function(){
 		var id = prompt("Enter a list ID if you want to open a specific list or nothing if you want to create a new:");
-		if(!id)
-			id = guid();
-		curList = id;
-		setListMode();
+		if (id !== null && id !== false) { // Canceled
+			if(!id)
+				id = guid();
+			curList = id;
+			setListMode();
+		}
 	});
 	
 	$("#removelist").click(function(){
@@ -237,6 +239,12 @@ function initFunctionality(){
 	});
 	
 	$("#title").click(titleClick);
+	$("#title").longpress(function(){
+		if(isListMode)
+			prompt("Use this to copy list ID:", curList);
+		else
+			prompt("Use this to copy bucket ID:", curBucket);
+	});
 }
 
 function refreshBucket(onlyRefresh){
