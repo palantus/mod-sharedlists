@@ -86,6 +86,18 @@ SharedLists.prototype.handleCustom = function(db, custom, callback){
 				});
 			}
 			break;
+		case "RenameListItem" :
+			if(custom.listId !== undefined && custom.itemId !== undefined)
+				this.getList(db, custom.listId, function(list){
+					db.query("UPDATE SL_ListItems SET Title = ? WHERE id = ? AND EXISTS (SELECT ClientId FROM SL_Lists WHERE SL_Lists.id = SL_ListItems.listid AND SL_Lists.ClientId = ?)", [custom.Title, custom.itemId, custom.listId], function(err){
+						//t.getList(db, custom.listId, function(list){
+							callback({success: true/*, list: list*/});
+						//});
+					});
+				});
+			else
+				callback({error:"Invalid request: No list id or item id"});
+			break;
 	}
 }
 

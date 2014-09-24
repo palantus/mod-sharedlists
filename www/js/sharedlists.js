@@ -362,7 +362,13 @@ function refreshList(onlyRefresh){
 				tr.longpress(function(){
 					var item = $(this).data("item");
 					if(item){
-						prompt("Copy content:", item.Title);
+						var newTitle = prompt("Enter a new title:", item.Title);
+						if(newTitle){
+							request({module: "sharedlists", message: {action: "RenameListItem", bucketId: curBucket, listId: curList, Title: newTitle, itemId: item.id}}, function(res){
+								$("#offline").hide();
+								refreshList();
+							})
+						}
 					}
 					return true;
 				});
