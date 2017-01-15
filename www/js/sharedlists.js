@@ -36,17 +36,17 @@ function init(){
 		cachedBuckets = $.cookie("buckets");
 		cachedLists = $.cookie("lists");
 	}
-	
+
 	if(!cachedBuckets)
 		cachedBuckets = {};
 	else if(typeof(cachedBuckets) === "string")
 		cachedBuckets = JSON.parse(cachedBuckets);
-		
+
 	if(!cachedLists)
 		cachedLists = {};
 	else if(typeof(cachedLists) === "string")
 		cachedLists = JSON.parse(cachedLists);
-	
+
 	if(getUrlVar("b") != undefined){
 		curBucket = getUrlVar("b");
 	}
@@ -54,21 +54,24 @@ function init(){
 		curList = getUrlVar("l");
 		setListMode();
 	}
-	
-	
+
+
 	$.detectSwipe.threshold = 100;
 	$.detectSwipe.preventDefault = false;
 	$(document).on("swiperight", function() {
 		$("#back:visible").click();
 		return true;
 	});
-	
+
 	$(window).focus(function() {
-	    $("#refresh").click();
+    if(isListMode)
+      refreshList();
+    else
+      refreshBucket();
 	})
 
 	refreshBucket();
-	
+
 	setTimeout(function(){
 		initFunctionality();
 	}, 500);
@@ -136,13 +139,16 @@ function initFunctionality(){
 		setBucketMode();
 	});
 
-	$("#refresh").click(function(){
-		if(isListMode)
+	$("#sort").click(function(){
+		if(isListMode){
+      localStorage.listsSort = localStorage.listsSort !== undefined ? (localStorage.listsSort == "false" ? "true" : "false") : "true";
 			refreshList();
-		else
+    } else {
+      localStorage.bucketsSort = localStorage.bucketsSort !== undefined ? (localStorage.bucketsSort == "false" ? "true" : "false") : "true";
 			refreshBucket();
+    }
 	});
-	
+
 	$("#clearcompleted").click(function(){
 		request({module: "sharedlists", message: {action: "ClearCompleted", bucketId: curBucket, listId: curList}}, function(res){
 			$("#offline").hide();
@@ -151,7 +157,7 @@ function initFunctionality(){
 			refreshList(true);
 		}, function(){$("#offline").show();});
 	});
-	
+
 	$("#additem").click(function(){
 		/*
 		var newTitle = prompt("Enter a title for the new item:");
@@ -164,7 +170,7 @@ function initFunctionality(){
 			}, function(){$("#offline").show();});
 		}
 		*/
-		
+
 		var popupCreator = new PopupCreator();
 		popupCreator.init({
 			title: "Add Item",
@@ -213,9 +219,9 @@ function initFunctionality(){
 			}
 		});
 		popupCreator.show();
-		
+
 	});
-	
+
 	$("#addlist").click(function(){
 		var id = prompt("Enter a list ID if you want to open a specific list or nothing if you want to create a new:");
 		if (id !== null && id !== false) { // Canceled
@@ -225,7 +231,7 @@ function initFunctionality(){
 			setListMode();
 		}
 	});
-	
+
 	$("#removelist").click(function(){
 		if(confirm("Do you really want to remove the list from your bucket?")){
 			request({module: "sharedlists", message: {action: "RemoveListFromBucket", bucketId: curBucket, listId: curList}}, function(res){
@@ -237,7 +243,7 @@ function initFunctionality(){
 			}, function(){$("#offline").show();});
 		}
 	});
-	
+
 	$("#title").click(titleClick);
 	$("#title").longpress(function(){
 		if(isListMode)
@@ -250,11 +256,11 @@ function initFunctionality(){
 function refreshBucket(onlyRefresh){
 	if(isListMode)
 		return;
-	
+
 	$("#title").html("");
 	tab = $("#maintable tbody");
 	tab.empty();
-	
+
 	if(!onlyRefresh){
 		getBucket(function(bucket){
 			onUpdate();
@@ -265,24 +271,24 @@ function refreshBucket(onlyRefresh){
 			}
 		});
 	}
-		
+
 	var b = cachedBuckets[curBucket];
 	if(b){
 		$("#title").html(b.Title);
-		var bucketLists = b.lists.sort(function(a, b){return a.Title > b.Title ? 1 : -1;});
+		var bucketLists = b.lists.sort(function(a, b){return a.Title.toLowerCase() > b.Title.toLowerCase() ? 1 : -1;});
 		for(i in bucketLists){
 			var tr = $("<tr/>");
 			var td = $("<td/>");
 			td.html(bucketLists[i].Title);
 			tr.data("list", bucketLists[i]);
-			
-			
+
+
 			tr.click(function(){
 				var list = $(this).data("list");
 				curList = list.id;
 				setListMode();
 			});
-			
+
 			/*
 			tr.swipe( {
         		tap:function(event, direction, distance, duration, fingerCount) {
@@ -300,11 +306,11 @@ function refreshBucket(onlyRefresh){
 function refreshList(onlyRefresh){
 	if(!isListMode)
 		return;
-		
+
 	$("#title").html("");
 	tab = $("#maintable tbody");
 	tab.empty();
-	
+
 	if(!onlyRefresh){
 		listRefreshId++;
 		var thisRefreshId = listRefreshId;
@@ -321,25 +327,25 @@ function refreshList(onlyRefresh){
 			}
 		});
 	}
-	
+
 	var l = cachedLists[curList];
 	if(l){
 		$("#title").html(l.Title);
-		
-		var listItems = l.items;
+
+		var listItems = localStorage.listsSort === "true" ? l.items.sort((a, b) => (a.Title.toLowerCase() < b.Title.toLowerCase() ? -1 : 1)) : l.items;
 		for(i in listItems){
 			var tr = $("<tr/>");
-			
+
 			var td = $("<td/>", {class:"completedcheckbox"});
 			td.append(listItems[i].finished? "&#10004;" : "&nbsp;");
 			tr.append(td);
-			
+
 			td = $("<td/>");
 			td.append(listItems[i].Title);
 			tr.append(td);
-			
+
 			tr.data("item", listItems[i]);
-			
+
 			tr.click(function(){
 				clearTimeout(refreshTimer);
 
@@ -373,7 +379,7 @@ function refreshList(onlyRefresh){
 					return true;
 				});
 			}
-			
+
 			tab.append(tr);
 		}
 	}
@@ -444,4 +450,11 @@ function setBucketMode(){
 
 function isMobileOrNarrow(){
 	return isMobile() || $(window).innerWidth() < 450;
+}
+
+function backup(){
+  alert("This opens a new window with the content of all lists, which has been opened on using browser");
+  var data = JSON.stringify(cachedLists);
+  window.open("data:application/json," + encodeURIComponent(data),
+                         "_blank", "width=600,height=500");
 }
