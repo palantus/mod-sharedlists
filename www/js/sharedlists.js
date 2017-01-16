@@ -452,9 +452,26 @@ function isMobileOrNarrow(){
 	return isMobile() || $(window).innerWidth() < 450;
 }
 
+function saveAs(uri, filename) {
+  var link = document.createElement('a');
+  if (typeof link.download === 'string') {
+    link.href = uri;
+    link.download = filename;
+
+    //Firefox requires the link to be in the body
+    document.body.appendChild(link);
+
+    //simulate click
+    link.click();
+
+    //remove the link when done
+    document.body.removeChild(link);
+  } else {
+    window.open(uri);
+  }
+}
+
 function backup(){
-  alert("This opens a new window with the content of all lists, which has been opened on using browser");
-  var data = JSON.stringify(cachedLists);
-  window.open("data:application/json," + encodeURIComponent(data),
-                         "_blank", "width=600,height=500");
+  alert("This downloads a backup with the content of all lists that has been opened using this browser");
+  saveAs('data:application/json,' + encodeURIComponent(JSON.stringify(cachedLists, null, 4)), "backup.json")
 }
